@@ -4,35 +4,33 @@ on:
   # 每日UTC 0点 = 北京时间上午8点自动更新全局数据
   schedule:
     - cron: "0 0 * * *"
-  # 支持页面手动点击运行
+  # 页面手动点击运行
   workflow_dispatch:
   # 推送代码时同步刷新卡片
   push:
     branches: [ main ]
 
-# 任务配置
 jobs:
   build-stats:
     runs-on: ubuntu-latest
-    # 赋予仓库读写权限，用于提交生成的svg文件
+    # 补充元数据读取权限，解决跨仓库访问限制
     permissions:
       contents: write
+      metadata: read
     steps:
-      # 1. 拉取当前仓库代码
+      # 1. 拉取仓库代码（升级v5消除Node20弃用警告）
       - name: Checkout repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # 2. 生成【账号全局总数据卡片】（所有仓库总Star、总提交、贡献天数）
       - name: Generate Global All-Repo Stats Card
         uses: soulteary/github-readme-stats-action@v1.0.0
         with:
           card: stats
-          # username仅填用户名，无repo参数 = 全局全仓库统计
           options: 'username=wangmc1024&show_icons=true&theme=tokyonight&hide_border=true'
-          # svg输出路径，自动创建assets文件夹存放
           path: assets/global-all-stats.svg
-          # 有私有仓库Token就填GITHUB_FULL_TOKEN，无则用默认token
-          token: ${{ secrets.GITHUB_FULL_TOKEN || github.token }}
+          # 固定使用你存入Secrets的完整权限Token
+          token: ${{ secrets.GITHUB_FULL_TOKEN }}
 
       # 3. 生成【全局编程语言统计卡片】（账号所有仓库代码语言占比）
       - name: Generate Global Top Languages Card
@@ -41,14 +39,13 @@ jobs:
           card: top-langs
           options: 'username=wangmc1024&layout=compact&theme=tokyonight&hide_border=true'
           path: assets/global-top-langs.svg
-          token: ${{ secrets.GITHUB_FULL_TOKEN || github.token }}
+          token: ${{ secrets.GITHUB_FULL_TOKEN }}
 
-      # 4. 自动提交生成的svg文件回仓库
+      # 4. 自动提交生成的svg文件回仓库，无变更则跳过
       - name: Commit & Push new SVG cards
         run: |
           git config --global user.name "GitHub Auto Bot"
           git config --global user.email "bot@github.com"
           git add assets/
-          # 无文件变更则跳过提交，避免空commit
           git diff --quiet && git diff --staged --quiet || git commit -m "auto: update global all-repo stats card"
           git push
