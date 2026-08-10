@@ -29,7 +29,7 @@ jobs:
           options: 'username=wangmc1024&show_icons=true&theme=tokyonight&hide_border=true'
           path: assets/global-all-stats.svg
           # 固定使用你存入Secrets的完整权限Token
-          token: ${{ secrets.GITHUB_FULL_TOKEN }}
+          token: ${{ secrets.GH_FULL_TOKEN }}
 
       # 3. 生成【全局编程语言统计卡片】（账号所有仓库代码语言占比）
       - name: Generate Global Top Languages Card
@@ -38,7 +38,7 @@ jobs:
           card: top-langs
           options: 'username=wangmc1024&layout=compact&theme=tokyonight&hide_border=true'
           path: assets/global-top-langs.svg
-          token: ${{ secrets.GITHUB_FULL_TOKEN }}
+          token: ${{ secrets.GH_FULL_TOKEN }}
 
       # 4. 自动提交生成的svg文件回仓库，无变更则跳过
       - name: Commit & Push new SVG cards
